@@ -1,3 +1,6 @@
+# sudo apt update
+# sudo apt install build-essential
+
 # Installin zsh
 
 sudo apt update && sudo apt install zsh -y
