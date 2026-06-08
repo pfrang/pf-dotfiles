@@ -60,3 +60,15 @@ echo 'export PATH="$HOME/.local/bin:$PATH"' >>~/.zshrc && source ~/.zshrc
 # sudo apt install fd-find
 # rg
 # sudo apt install rg
+#
+#
+#
+# PERONSLA REPOS
+#
+# git clone git@github.com:pfrang/sunchaser.git
+# git clone git@github.com:pfrang/c.git
+# git clone git@github.com:pfrang/uio.git
+# git clone git@github.com:pfrang/games.git
+# git clone git@github.com:pfrang/websocket.git
+# git@github.com:pfrang/l-p_game.git
+# git@github.com:pfrang/go.git
