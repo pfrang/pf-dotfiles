@@ -4,12 +4,8 @@ return {
 		opts = {
 			picker = {
 				sources = {
-
 					files = {
-
-						-- This shows hidden files in all picker layouts
 						hidden = true,
-						-- Optional: If you also want to show files ignored by .gitignore
 						ignored = true,
 					},
 
@@ -26,16 +22,6 @@ return {
 			},
 		},
 	},
-	-- {
-	-- 	"mason-org/mason.nvim",
-	-- 	opts = {
-	-- 		ensure_installed = {
-	-- 			"typescript-language-server",
-	-- 			"prettier",
-	-- 			"eslint_d",
-	-- 		},
-	-- 	},
-	-- },
 	{
 		"Fildo7525/pretty_hover",
 		event = "LspAttach",
@@ -47,6 +33,15 @@ return {
 	{
 		"sindrets/diffview.nvim",
 		cmd = { "DiffviewOpen", "DiffviewClose", "DiffviewFileHistory" },
+	},
+	{
+		"lewis6991/gitsigns.nvim",
+		opts = {
+			current_line_blame = true,
+			-- current_line_blame_opts = {
+			-- 	delay = 500,
+			-- },
+		},
 	},
 	{
 		"saghen/blink.cmp",
