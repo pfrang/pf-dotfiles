@@ -1,5 +1,5 @@
-# sudo apt update
-# sudo apt install build-essential
+sudo apt update
+sudo apt install build-essential
 
 # Installin zsh
 
@@ -20,11 +20,8 @@ if [ ! -d "$ZSH_PLUGINS_DIR/zsh-syntax-highlighting" ]; then
   git clone https://github.com/zsh-users/zsh-syntax-highlighting
 fi
 cd "$CURRENT_DIR"
-
-#Add github copilot - enables command ghcs and ghce
-# echo 'eval "$(gh copilot alias -- zsh)"' >> ~/.zshrc
-
 # Refresh the current terminal with the newly installed configuration
+
 zsh ~/.zshrc
 
 # NVM
@@ -45,25 +42,8 @@ npm install -g pnpm
 curl -fsSL https://claude.ai/install.sh | bash
 
 echo 'export PATH="$HOME/.local/bin:$PATH"' >>~/.zshrc && source ~/.zshrc
-
-# Neovim
-# git clone git@github.com:neovim/neovim.git
-#  Checkout to branch which version you want
-# make CMAKE_BUILD_TYPE=RelWithDebInfo
-# sudo make install
-#
-# Starter configuration
-# sudo apt install ripgrep
-# git clone https://github.com/LazyVim/starter
-#
-# fdfind - for a Neovim plugin
-# sudo apt install fd-find
-# rg
-# sudo apt install rg
-#
-#
-#
 # PERONSLA REPOS
+
 #
 # git clone git@github.com:pfrang/sunchaser.git
 # git clone git@github.com:pfrang/c.git
