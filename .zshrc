@@ -14,6 +14,9 @@ ZSH_DISABLE_COMPFIX=true
 
 # Actually load Oh-My-Zsh
 source "${ZSH}/oh-my-zsh.sh"
+
+# Show full path from HOME instead of just current directory name
+PROMPT="%(?:%{$fg_bold[green]%}➜ :%{$fg_bold[red]%}➜ ) %{$fg[cyan]%}%~%{$reset_color%} $(git_prompt_info)"
 unalias rm # No interactive rm by default (brought by plugins/common-aliases)
 
 # # Load rbenv if installed (to manage your Ruby versions)
