@@ -1,0 +1,127 @@
+// Zed settings
+//
+// For information on how to configure Zed, see the Zed
+// documentation: https://zed.dev/docs/configuring-zed
+//
+// To see all of Zed's default settings without changing your
+// custom settings, run `zed: open default settings` from the
+// command palette (cmd-shift-p / ctrl-shift-p)
+{
+    "outline_panel": {
+        "dock": "left"
+    },
+    "collaboration_panel": {
+        "dock": "left"
+    },
+    "git_panel": {
+        "dock": "left"
+    },
+    "edit_predictions": {
+        "provider": "copilot"
+    },
+    "context_servers": {
+        "svelte-mcp": {
+            "enabled": true,
+            "remote": false,
+            "settings": {}
+        },
+        "mcp-server-supabase": {
+            "enabled": true,
+            "remote": false,
+            "settings": {
+                "read_only": false,
+                "supabase_access_token": "xxxx"
+            }
+        }
+    },
+    "project_panel": {
+        "dock": "left",
+        "hide_hidden": false
+    },
+    "vim_mode": true,
+    "agent": {
+        "dock": "right",
+        "tool_permissions": {
+            "default": "allow"
+        },
+        "profiles": {
+            "ask": {
+                "name": "Ask",
+                "tools": {
+                    "search_web": true,
+                    "diagnostics": true,
+                    "fetch": true,
+                    "list_directory": true,
+                    "project_notifications": false,
+                    "now": true,
+                    "find_path": true,
+                    "read_file": true,
+                    "open": true,
+                    "grep": true,
+                    "spawn_agent": true,
+                    "thinking": true,
+                    "update_plan": true
+                },
+                "enable_all_context_servers": false,
+                "context_servers": {
+                    "mcp-server-supabase": {
+                        "tools": {
+                            "get_advisors": true,
+                            "search_docs": true,
+                            "pause_project": false,
+                            "merge_branch": true,
+                            "list_tables": true,
+                            "list_projects": true,
+                            "list_organizations": true,
+                            "list_migrations": true,
+                            "list_extensions": true,
+                            "list_edge_functions": true,
+                            "list_branches": true,
+                            "get_publishable_keys": true,
+                            "get_cost": true,
+                            "get_edge_function": true,
+                            "get_organization": true,
+                            "get_logs": true,
+                            "get_project_url": true,
+                            "get_project": true,
+                            "delete_branch": false,
+                            "create_project": false,
+                            "create_branch": false,
+                            "confirm_cost": true,
+                            "apply_migration": true
+                        }
+                    },
+                    "svelte-mcp": {
+                        "tools": {
+                            "svelte-autofixer": true,
+                            "playground-link": true,
+                            "list-sections": true,
+                            "get-documentation": true
+                        }
+                    }
+                }
+            }
+        },
+        "default_profile": "ask",
+        "default_model": {
+            "effort": "high",
+            "enable_thinking": true,
+            "provider": "copilot_chat",
+            "model": "claude-opus-4.6"
+        }
+    },
+    "lsp": {
+        "tailwindcss-language-server": {
+            "settings": {
+                "classFunctions": ["cn"]
+            }
+        }
+    },
+    "show_whitespaces": "all",
+    "icon_theme": "Material Icon Theme",
+    "theme": "VSCode Dark Modern",
+    "ui_font_size": 16,
+    "buffer_font_size": 16,
+    "format_on_save": "on",
+    "formatter": "prettier"
+}
