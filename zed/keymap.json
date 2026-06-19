@@ -1,0 +1,85 @@
+// Zed keymap
+//
+// For information on binding keys, see the Zed
+// documentation: https://zed.dev/docs/key-bindings
+//
+// To see the default key bindings run `zed: open default keymap`
+// from the command palette.
+[
+  {
+    "bindings": {
+      "ctrl-p": "file_finder::Toggle",
+      "ctrl-h": "workspace::ActivatePaneLeft",
+      "ctrl-l": "workspace::ActivatePaneRight",
+      "ctrl-k": "workspace::ActivatePaneUp",
+      "ctrl-j": "workspace::ActivatePaneDown",
+      "ctrl-n": "workspace::ToggleLeftDock",
+      "ctrl-b": "workspace::ToggleRightDock"
+    }
+  },
+  {
+    "context": "Editor",
+    "bindings": {
+      "ctrl-c": "editor::Copy",
+      "ctrl-v": "editor::Paste",
+      "ctrl-x": "editor::Cut",
+      "ctrl-s": "workspace::Save",
+      "ctrl-a": "editor::SelectAll",
+      "ctrl-y": "editor::Redo",
+      "ctrl-w": "pane::CloseActiveItem",
+      "ctrl-d": "editor::SelectNext",
+      "ctrl-f": ["buffer_search::Deploy", { "replace_enabled": true }],
+      "ctrl-shift-f": ["pane::DeploySearch", { "replace_enabled": true }]
+    }
+  },
+  {
+    "context": "Editor && vim_mode == normal",
+    "bindings": {
+      // "shift shift": "file_finder::Toggle"
+      "ctrl-c": "editor::Copy",
+      "ctrl-v": "editor::Paste",
+      "ctrl-x": "editor::Cut",
+      "ctrl-s": "workspace::Save",
+      "ctrl-a": "editor::SelectAll",
+      "ctrl-y": "editor::Redo",
+      "ctrl-w": "pane::CloseActiveItem",
+      "ctrl-d": "editor::SelectNext",
+      "ctrl-f": ["buffer_search::Deploy", { "replace_enabled": true }],
+      "ctrl-shift-f": ["pane::DeploySearch", { "replace_enabled": true }]
+    }
+  },
+  {
+    "context": "Editor && vim_mode == insert",
+    "bindings": {
+      "ctrl-w": "pane::CloseActiveItem"
+      // "j k": "vim::NormalBefore"
+    }
+  },
+  {
+    "context": "ProjectPanel",
+    "bindings": {
+      "ctrl-e": "project_panel::CollapseAllEntries",
+      "ctrl-a": "project_panel::NewFile",
+      "ctrl-d": "project_panel::Delete",
+      "ctrl-r": "project_panel::Rename"
+    }
+  },
+  {
+    "context": "Workspace",
+    "bindings": {
+      "ctrl-t": "workspace::NewFile"
+    }
+  },
+  {
+    "context": "(vim_mode == insert && !(showing_code_actions || showing_completions))",
+    "bindings": {
+      "ctrl-n": "editor::ShowWordCompletions"
+    }
+  },
+  {
+    "context": "Terminal",
+    "bindings": {
+      "ctrl-s": null
+    }
+  }
+]
