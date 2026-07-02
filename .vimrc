@@ -13,19 +13,3 @@ colorscheme habamax
 set list
 set listchars=space:·,tab:»\ ,trail:·
 
-" Format C/C++ files with clang-format on save, preserving cursor position
-
-"function! FormatWithClangFormat()
-"  let l:curw = winsaveview()
-"  silent %!clang-format --style=file
-"  if v:shell_error
-"    undo
-"  endif
-"  call winrestview(l:curw)
-"endfunction
-"
-"augroup ClangFormat
-"  autocmd!
-"  autocmd BufWritePre *.c,*.h,*.cpp,*.hpp call FormatWithClangFormat()
-"augroup END
-"
