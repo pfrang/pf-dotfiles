@@ -5,3 +5,7 @@
 vim.opt.wrap = true
 vim.opt.breakindent = true
 vim.opt.linebreak = true
+
+-- show whitespace: leading spaces as dots, tabs, trailing spaces, non-breaking spaces
+vim.opt.list = true
+vim.opt.listchars = { lead = "·", tab = "» ", trail = "·", nbsp = "␣" }

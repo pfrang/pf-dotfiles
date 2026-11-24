@@ -1,0 +1,169 @@
+#!/usr/bin/env bash
+# claude-pull — fetch a Claude Code session from the Pi archive and resume it here.
+#
+#   claude-pull              pick from recent sessions across all machines
+#   claude-pull <session-id> resume that session directly
+#
+# The archive is written by claude/hooks/sync-to-pi.sh (SessionEnd hook):
+#   <archive>/<hostname>/projects/<project-dir>/<session-id>.jsonl
+#
+# Run it from the directory you want Claude to work in (usually the same repo,
+# pulled to the same commit). Works with the stock bash on macOS (3.2).
+
+set -euo pipefail
+
+REMOTE="${CLAUDE_ARCHIVE_REMOTE:-pfrang@home}"
+ARCHIVE="${CLAUDE_ARCHIVE_DIR:-claude-archive}"
+LIMIT="${CLAUDE_PULL_LIMIT:-30}"
+SSH_OPTS=(-o BatchMode=yes -o ConnectTimeout=5)
+
+die() { echo "claude-pull: $*" >&2; exit 1; }
+
+# List sessions on the Pi, newest first, one line per session id (newest copy
+# wins when the same session exists under several hosts).
+# Output (tab separated): id, date, host, original cwd, title, remote path, table row.
+# The first line is the table header: "HEADER" followed by empty fields and the header row.
+list_sessions() {
+  ssh "${SSH_OPTS[@]}" "$REMOTE" "python3 - '$ARCHIVE' '$1' '$LIMIT' '$2'" <<'PY'
+import glob, json, os, re, sys, time
+
+archive, want_id, limit, width = sys.argv[1], sys.argv[2], int(sys.argv[3]), int(sys.argv[4])
+archive = os.path.expanduser(archive)
+pattern = os.path.join(archive, "*", "projects", "*", (want_id or "*") + ".jsonl")
+
+newest = {}  # id -> (mtime, path)
+for path in glob.glob(pattern):
+    sid = os.path.basename(path)[:-len(".jsonl")]
+    mtime = os.path.getmtime(path)
+    if sid not in newest or mtime > newest[sid][0]:
+        newest[sid] = (mtime, path)
+
+def describe(path):
+    cwd = title = last_prompt = first_prompt = ""
+    with open(path, errors="replace") as f:
+        for line in f:
+            try:
+                d = json.loads(line)
+            except ValueError:
+                continue
+            t = d.get("type")
+            if not cwd and d.get("cwd"):
+                cwd = d["cwd"]
+            if t in ("custom-title", "ai-title"):
+                title = d.get("customTitle") or d.get("aiTitle") or title
+            elif t == "last-prompt":
+                last_prompt = d.get("lastPrompt") or last_prompt
+            elif t == "user" and not first_prompt and not d.get("isMeta"):
+                c = (d.get("message") or {}).get("content")
+                if isinstance(c, list):
+                    c = " ".join(p.get("text", "") for p in c if isinstance(p, dict))
+                if isinstance(c, str) and c.strip() and not c.lstrip().startswith("<"):
+                    first_prompt = c
+    text = title or first_prompt or last_prompt or "(no prompt)"
+    return cwd or "?", " ".join(text.split())[:80]
+
+def when(mtime):
+    t, now = time.localtime(mtime), time.localtime()
+    days = (time.mktime(now[:3] + (0, 0, 0) + now[6:]) - time.mktime(t[:3] + (0, 0, 0) + t[6:])) // 86400
+    if days == 0:
+        return "today " + time.strftime("%H:%M", t)
+    if days == 1:
+        return "yesterday " + time.strftime("%H:%M", t)
+    if t.tm_year == now.tm_year:
+        return time.strftime("%b %d %H:%M", t)
+    return time.strftime("%Y-%m-%d", t)
+
+def short_dir(cwd, room):
+    cwd = re.sub(r"^/(home|Users)/[^/]+", "~", cwd)
+    return cwd if len(cwd) <= room else "…" + cwd[-(room - 1):]
+
+def cut(s, n):
+    return s if len(s) <= n else s[:max(n - 1, 0)] + "…"
+
+rows = []
+for sid, (mtime, path) in sorted(newest.items(), key=lambda kv: kv[1][0], reverse=True)[:limit]:
+    host = path[len(archive):].lstrip("/").split("/")[0]
+    cwd, text = describe(path)
+    rows.append([sid, when(mtime), host, cwd, text, path])
+
+head = ["WHEN", "HOST", "DIRECTORY", "TITLE"]
+w_when = max([len(head[0])] + [len(r[1]) for r in rows])
+w_host = max([len(head[1])] + [len(r[2]) for r in rows])
+w_dir = min(35, max([len(head[2])] + [len(short_dir(r[3], 35)) for r in rows]))
+w_title = max(20, width - w_when - w_host - w_dir - 6)
+
+def table_row(a, b, c, d):
+    return "  ".join([a.ljust(w_when), cut(b, w_host).ljust(w_host), c.ljust(w_dir), cut(d, w_title)])
+
+print("\t".join(["HEADER", "", "", "", "", "", table_row(*head)]))
+for sid, date, host, cwd, text, path in rows:
+    print("\t".join([sid, date, host, cwd, text, path, table_row(date, host, short_dir(cwd, w_dir), text)]))
+PY
+}
+
+ID="${1:-}"
+COLS="$(tput cols 2>/dev/null || echo 100)"
+# Leave room for the picker's own margin (fzf pointer / "  #  " column).
+OUTPUT="$(list_sessions "$ID" "$((COLS - 6))")" || die "could not reach $REMOTE"
+HEADER="$(printf '%s\n' "$OUTPUT" | head -n 1 | cut -f7)"
+LISTING="$(printf '%s\n' "$OUTPUT" | sed 1d)"
+[ -n "$LISTING" ] || die "no session${ID:+ '$ID'} found in $REMOTE:$ARCHIVE"
+
+if [ -z "$ID" ]; then
+  if command -v fzf >/dev/null 2>&1; then
+    CHOICE="$(printf '%s\n' "$LISTING" | fzf --delimiter=$'\t' --with-nth=7 \
+      --header="$HEADER" --layout=reverse --height=60% --tiebreak=index \
+      --prompt='resume> ')" || exit 1
+  else
+    BOLD="" DIM="" RESET=""
+    if [ -t 1 ]; then
+      BOLD="$(tput bold 2>/dev/null || true)"; DIM="$(tput dim 2>/dev/null || true)"
+      RESET="$(tput sgr0 2>/dev/null || true)"
+    fi
+    printf '%s%3s  %s%s\n' "$BOLD" "#" "$HEADER" "$RESET"
+    printf '%s%s%s\n' "$DIM" "$(printf '%*s' "$((COLS - 1))" '' | tr ' ' '-')" "$RESET"
+    i=0
+    while IFS=$'\t' read -r _ _ _ _ _ _ row; do
+      i=$((i + 1))
+      printf '%3d  %s\n' "$i" "$row"
+    done <<<"$LISTING"
+    echo
+    read -r -p "Pick a session [1-$i]: " n
+    case "$n" in ''|*[!0-9]*) die "not a number: $n" ;; esac
+    [ "$n" -ge 1 ] && [ "$n" -le "$i" ] || die "out of range: $n"
+    CHOICE="$(printf '%s\n' "$LISTING" | sed -n "${n}p")"
+  fi
+else
+  CHOICE="$(printf '%s\n' "$LISTING" | head -n 1)"
+fi
+
+IFS=$'\t' read -r ID _ HOST ORIG_CWD TEXT SRC _ <<<"$CHOICE"
+
+# Warn when this doesn't look like the same project as the original session.
+HERE="$(pwd -P)"
+if [ "$(basename "$HERE")" != "$(basename "$ORIG_CWD")" ]; then
+  echo "Session ran in $HOST:$ORIG_CWD, but you are in $HERE."
+  read -r -p "Resume it here anyway? [y/N] " ok
+  case "$ok" in y|Y|yes) ;; *) exit 1 ;; esac
+fi
+
+# Claude Code keeps sessions in ~/.claude/projects/<cwd with non-alphanumerics as ->/
+DEST_DIR="$HOME/.claude/projects/$(printf '%s' "$HERE" | sed 's/[^a-zA-Z0-9]/-/g')"
+DEST="$DEST_DIR/$ID.jsonl"
+mkdir -p "$DEST_DIR"
+
+TMP="$(mktemp)"
+trap 'rm -f "$TMP"' EXIT
+scp -q -p "${SSH_OPTS[@]}" "$REMOTE:$SRC" "$TMP" || die "copy from $REMOTE failed"
+
+# Transcripts are append-only: never replace a local copy that is longer than the Pi's
+# (e.g. a session from this machine that hasn't synced yet).
+if [ -f "$DEST" ] && [ "$(wc -l <"$DEST")" -gt "$(wc -l <"$TMP")" ]; then
+  echo "Local copy is newer than the Pi's; keeping it."
+  rm -f "$TMP"
+else
+  mv "$TMP" "$DEST"
+fi
+
+echo "Resuming $ID from $HOST: $TEXT"
+exec claude --resume "$ID"
