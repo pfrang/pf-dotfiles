@@ -58,4 +58,17 @@ return {
 			},
 		},
 	},
+	{
+		"nvim-lualine/lualine.nvim",
+		opts = function(_, opts)
+			table.insert(opts.sections.lualine_x, 1, { "lsp_status" })
+		end,
+	},
+	{
+		"neovim/nvim-lspconfig",
+		opts = {
+			-- inline type/param hints (e.g. `request: Request<...>`); toggle with <leader>uh
+			inlay_hints = { enabled = false },
+		},
+	},
 }

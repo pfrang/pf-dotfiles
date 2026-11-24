@@ -18,8 +18,16 @@ require("lazy").setup({
 	spec = {
 		-- add LazyVim and import its plugins
 		{ "LazyVim/LazyVim", import = "lazyvim.plugins" },
-		-- extras
+		-- extras: languages (each sets up LSP + Mason install + treesitter + formatter)
+		{ import = "lazyvim.plugins.extras.lang.typescript" }, -- vtsls (LazyVim default ts_lsp)
+		{ import = "lazyvim.plugins.extras.lang.json" }, -- jsonls + SchemaStore (package.json, tsconfig)
+		{ import = "lazyvim.plugins.extras.lang.svelte" },
+		{ import = "lazyvim.plugins.extras.lang.tailwind" },
+		{ import = "lazyvim.plugins.extras.lang.python" },
+		{ import = "lazyvim.plugins.extras.lang.go" },
+		-- extras: formatting / linting
 		{ import = "lazyvim.plugins.extras.formatting.prettier" },
+		{ import = "lazyvim.plugins.extras.linting.eslint" },
 		-- import/override with your plugins
 		{ import = "plugins" },
 	},
